@@ -1,4 +1,4 @@
-// Portfolio Tab Navigation System with Apple-style Scroll Animations
+// Portfolio Tab Navigation System with Scroll Animations
 document.addEventListener('DOMContentLoaded', function() {
     // Get all tab buttons and tab panes
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -27,151 +27,50 @@ document.addEventListener('DOMContentLoaded', function() {
                     behavior: 'smooth'
                 });
                 
-                // Trigger animations for the new content
+                // Reset text animations for new tab
                 setTimeout(() => {
-                    triggerScrollAnimations();
+                    resetTextAnimations();
+                    initScrollAnimations();
                 }, 100);
             }
         });
     });
     
-    // Scroll-triggered animations
-    function triggerScrollAnimations() {
-        const contentBlocks = document.querySelectorAll('.content-block');
-        contentBlocks.forEach((block, index) => {
-            // Reset animation state
-            block.style.opacity = '0';
-            block.style.transform = 'translateY(50px)';
-            
-            // Create intersection observer for each block
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Add staggered animation delay
-                        setTimeout(() => {
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateY(0)';
-                            entry.target.classList.add('animate');
-                        }, index * 200); // Stagger animations by 200ms
-                        
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.3,
-                rootMargin: '0px 0px -100px 0px'
+    // Initialize scroll animations
+    initScrollAnimations();
+    
+    // Function to initialize scroll animations
+    function initScrollAnimations() {
+        const contentOverlays = document.querySelectorAll('.content-overlay');
+        
+        // Create intersection observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Add delay based on scroll direction
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, 200);
+                }
             });
-            
-            observer.observe(block);
+        }, {
+            threshold: 0.3,
+            rootMargin: '0px 0px -100px 0px'
+        });
+        
+        // Observe all content overlays
+        contentOverlays.forEach(overlay => {
+            observer.observe(overlay);
         });
     }
     
-    // Initialize animations for the first active tab
-    triggerScrollAnimations();
-    
-    // Parallax effect for images
-    function handleParallax() {
-        const scrolled = window.pageYOffset;
-        const parallaxElements = document.querySelectorAll('.image-container');
-        
-        parallaxElements.forEach((element, index) => {
-            const speed = 0.5 + (index * 0.1);
-            const yPos = -(scrolled * speed);
-            element.style.transform = `translateY(${yPos}px)`;
+    // Function to reset text animations
+    function resetTextAnimations() {
+        const contentOverlays = document.querySelectorAll('.content-overlay');
+        contentOverlays.forEach(overlay => {
+            overlay.classList.remove('visible');
         });
     }
-    
-    // Throttled scroll handler for performance
-    let ticking = false;
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                handleParallax();
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }
-    
-    // Add scroll event listener
-    window.addEventListener('scroll', requestTick);
-    
-    // Smooth reveal animations for content blocks
-    function createRevealAnimations() {
-        const contentBlocks = document.querySelectorAll('.content-block');
-        
-        contentBlocks.forEach((block, index) => {
-            // Set initial state
-            block.style.opacity = '0';
-            block.style.transform = index % 2 === 0 ? 'translateX(-100px)' : 'translateX(100px)';
-            
-            // Create reveal observer
-            const revealObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Staggered reveal animation
-                        setTimeout(() => {
-                            entry.target.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateX(0)';
-                        }, index * 150);
-                        
-                        revealObserver.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.2,
-                rootMargin: '0px 0px -50px 0px'
-            });
-            
-            revealObserver.observe(block);
-        });
-    }
-    
-    // Initialize reveal animations
-    createRevealAnimations();
-    
-    // Enhanced hover effects for content blocks
-    const contentBlocks = document.querySelectorAll('.content-block');
-    contentBlocks.forEach(block => {
-        block.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-8px) scale(1.02)';
-        });
-        
-        block.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-    
-    // Smooth scroll for navigation links
-    const socialLinks = document.querySelectorAll('.social-link');
-    socialLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Add click effect
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = 'scale(1)';
-            }, 150);
-            
-            // Here you can add actual navigation logic
-            console.log('Navigating to:', this.textContent);
-        });
-    });
-    
-    // Add loading animation for images
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-        img.addEventListener('load', function() {
-            this.style.opacity = '1';
-        });
-        
-        img.addEventListener('error', function() {
-            this.style.opacity = '0.5';
-            this.style.filter = 'grayscale(100%)';
-        });
-    });
     
     // Add keyboard navigation support
     document.addEventListener('keydown', function(e) {
@@ -185,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
             e.preventDefault();
             const prevIndex = currentIndex === 0 ? tabButtons.length - 1 : currentIndex - 1;
-            tabButtons[prevIndex].click();
+            tabButtons[nextIndex].click();
         }
     });
     
@@ -220,34 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Performance optimization: Debounce scroll events
-    let scrollTimeout;
-    window.addEventListener('scroll', function() {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-        
-        scrollTimeout = setTimeout(() => {
-            // Handle scroll-based animations here if needed
-        }, 16); // 60fps
-    });
-    
-    // Add click outside functionality to close any open modals (if added later)
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.tab-button') && !e.target.closest('.tab-pane')) {
-            // Handle any modal closing logic here
-        }
-    });
-    
-    // Initialize with first tab active (already done in HTML)
-    console.log('Portfolio navigation system with Apple-style scroll animations initialized successfully!');
+    // Initialize with first tab active
+    console.log('Portfolio navigation system with scroll animations initialized successfully!');
 });
-
-// Utility function for smooth animations
-function animateElement(element, properties, duration = 300) {
-    element.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-    Object.assign(element.style, properties);
-}
 
 // Export functions for potential external use
 window.PortfolioApp = {
@@ -261,17 +135,5 @@ window.PortfolioApp = {
     getActiveTab: function() {
         const activeButton = document.querySelector('.tab-button.active');
         return activeButton ? activeButton.getAttribute('data-tab') : null;
-    },
-    
-    triggerAnimations: function() {
-        // Manually trigger scroll animations
-        const contentBlocks = document.querySelectorAll('.content-block');
-        contentBlocks.forEach((block, index) => {
-            setTimeout(() => {
-                block.style.opacity = '1';
-                block.style.transform = 'translateY(0)';
-                block.classList.add('animate');
-            }, index * 200);
-        });
     }
 };
